@@ -70,6 +70,7 @@ def venues():
   current_time = datetime.now(timezone.utc)
   current_city=' '
   data=[]
+  
   for city in cities:
       venues = db.session.query(Venue).filter(Venue.city == city[0]).order_by('id').all()
       for venue in venues:
@@ -90,6 +91,7 @@ def venues():
                 "name":venue.name,
                 "num_upcoming_shows": len(num_upcoming_shows)
               })
+            
   return render_template('pages/venues.html', areas=data)
 
 @app.route('/venues/search', methods=['POST'])
@@ -101,7 +103,7 @@ def search_venues():
   search = "%{}%".format(term.lower())
   res= Venue.query.filter(or_(Venue.name.ilike(search), Venue.city.ilike(search), Venue.state.ilike(search))).all()
   response = {'count':len(res),'data':res}
-  return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
+  return render_template('pages/search_venues.html', results=response, search_term=term)
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
@@ -129,6 +131,7 @@ def show_venue(venue_id):
         "seeking_description": col.seeking_description,
         "image_link": col.image_link,
         })
+        
         for show in upcoming_shows:
             if len(upcoming_shows) == 0:
                   data.update({"upcoming_shows": [],})
@@ -140,6 +143,7 @@ def show_venue(venue_id):
                   "artist_image_link": artist.image_link,
                   "start_time": show.start_time.strftime('%m/%d/%Y'),
                   })
+                  
         for show in past_shows:
             if len(past_shows) == 0:
                   data.update({"past_shows": [],})
@@ -153,7 +157,8 @@ def show_venue(venue_id):
                   })
         data.update({"upcoming_shows": up_show})
         data.update({"past_shows": down_show})
-        data.update({"past_shows_count": len(past_shows), "upcoming_shows_count": len(upcoming_shows),})
+        data.update({"past_shows_count": len(past_shows), "upcoming_shows_count": len(upcoming_shows)})
+        
   return render_template('pages/show_venue.html', venue=data)
 
 #  Create Venue
@@ -189,11 +194,13 @@ def create_venue_submission():
     print(sys.exc_info())
   finally:
     db.session.close()
+    
   if not error:
     flash('Venue ' + request.form.get('name') + ' was successfully listed!')
   else:
     flash('An error occurred. Venue ' + request.form.get('name') + ' could not be listed.')
     abort(500)
+    
   return render_template('pages/home.html')
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
